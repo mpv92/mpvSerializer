@@ -1,0 +1,17 @@
+{
+    "name": "mpv92/serializer",
+    "description": "A PHP Package for Serialization and Deserialization",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Mpv92\\Serializer\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Marjan Popov",
+            "email": "marjan.popov@mgb.ch"
+        }
+    ],
+    "require": {}
+}
