@@ -2,6 +2,8 @@
 
 namespace Mpv92\Serializer;
 
+use Mpv92\Serializer\Attributes\Collection;
+
 class MpvSerializer
 {
     private array $reflectionCache = [];
@@ -17,26 +19,30 @@ class MpvSerializer
     }
 
     /**
-     * @template T
+     * @template T of object
+     * @param string|array $jsonOrArray
      * @param class-string<T> $className
-     * @return T
-     * @throws \ReflectionException
+     * @return T|array<T>
      */
-    public function toModel(array|string $jsonOrArray, string $className): mixed
+    public function deserialize(string|array $jsonOrArray, string $className): object|array
     {
         if (!class_exists($className)) {
             throw new \InvalidArgumentException("Class $className does not exist.");
         }
 
         $data = is_string($jsonOrArray)
-            ? json_decode($jsonOrArray, true)
+            ? json_decode($jsonOrArray, true, 512, JSON_THROW_ON_ERROR)
             : $jsonOrArray;
 
         if (!is_array($data)) {
-            throw new \InvalidArgumentException("Invalid JSON input.");
+            throw new \InvalidArgumentException("Invalid input, expected array or JSON object.");
         }
 
-        // Reflection-Caching
+        if ($this->isSequentialArray($data)) {
+            return array_map(fn($item) => $this->deserialize($item, $className), $data);
+        }
+
+
         $reflection = $this->reflectionCache[$className] ??= new \ReflectionClass($className);
         $constructor = $reflection->getConstructor();
 
@@ -49,19 +55,35 @@ class MpvSerializer
             $name = $param->getName();
             $type = $param->getType();
 
-            if (!array_key_exists($name, $data)) {
-                $args[] = $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null;
+            $value = $data[$name] ?? ($param->isDefaultValueAvailable() ? $param->getDefaultValue() : null);
+
+            // Attribute "Collection" zeigt von welcher Klasse eine Collection ist
+            // => könnt eman allenfalls auch mit phpdoc machen? User[] oder so
+            $attributes = $param->getAttributes(Collection::class);
+            if (!empty($attributes) && is_array($value)) {
+                $attr = $attributes[0]->newInstance();
+                $itemClass = $attr->className;
+
+                $args[] = array_map(fn($item) => $this->deserialize($item, $itemClass), $value);
                 continue;
             }
-
-            $value = $data[$name];
 
             if ($type instanceof \ReflectionNamedType) {
                 $typeName = $type->getName();
 
-                if (!in_array($typeName, ['int', 'float', 'bool', 'string', 'array', 'mixed']) && class_exists($typeName)) {
-                    // Rekursiver Aufruf direkt mit Array
-                    $args[] = $this->toModel($value, $typeName);
+                if ($type->isBuiltin()) {
+                    $args[] = $value;
+                    continue;
+                }
+
+                if (is_array($value)) {
+                    $args[] = $this->deserialize($value, $typeName);
+                    continue;
+                }
+
+                // Für Generische Klassen
+                if ($value !== null) {
+                    $args[] = new $typeName($value);
                     continue;
                 }
             }
@@ -70,5 +92,10 @@ class MpvSerializer
         }
 
         return $reflection->newInstanceArgs($args);
+    }
+
+    private function isSequentialArray(array $array): bool
+    {
+        return array_keys($array) === range(0, count($array) - 1);
     }
 }
