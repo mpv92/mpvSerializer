@@ -1,5 +1,5 @@
 {
-    "name": "mpv92/serializer",
+    "name": "mpv92/mpvserializer",
     "description": "A PHP Package for Serialization and Deserialization",
     "type": "library",
     "autoload": {
