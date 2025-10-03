@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpv92\Serializer\Exceptions;
+namespace Mpv92\MpvSerializer\Exceptions;
 
 class MpvSerializerException extends \Exception
 {

@@ -4,7 +4,7 @@
     "type": "library",
     "autoload": {
         "psr-4": {
-            "Mpv92\\Serializer\\": "src/"
+            "Mpv92\\MpvSerializer\\": "src/"
         }
     },
     "authors": [

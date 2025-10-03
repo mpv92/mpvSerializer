@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpv92\Serializer\Attributes;
+namespace Mpv92\MpvSerializer\Attributes;
 #[\Attribute(\Attribute::TARGET_PARAMETER)]
 class Collection
 {

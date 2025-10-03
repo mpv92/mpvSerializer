@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpv92\Serializer\Examples;
+namespace Mpv92\MpvSerializer\Examples;
 class Flower
 {
     public function __construct(

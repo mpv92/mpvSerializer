@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpv92\Serializer\Examples;
+namespace Mpv92\MpvSerializer\Examples;
 
-use Mpv92\Serializer\Attributes\Collection;
+use Mpv92\MpvSerializer\Attributes\Collection;
 
 class User
 {

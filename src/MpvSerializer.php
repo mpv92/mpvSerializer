@@ -1,8 +1,8 @@
 <?php
 
-namespace Mpv92\Serializer;
+namespace Mpv92\MpvSerializer;
 
-use Mpv92\Serializer\Attributes\Collection;
+use Mpv92\MpvSerializer\Attributes\Collection;
 
 class MpvSerializer
 {
@@ -38,7 +38,7 @@ class MpvSerializer
             throw new \InvalidArgumentException("Invalid input, expected array or JSON object.");
         }
 
-        if ($this->isSequentialArray($data)) {
+        if (array_is_list($data)) {
             return array_map(fn($item) => $this->deserialize($item, $className), $data);
         }
 
@@ -92,10 +92,5 @@ class MpvSerializer
         }
 
         return $reflection->newInstanceArgs($args);
-    }
-
-    private function isSequentialArray(array $array): bool
-    {
-        return array_keys($array) === range(0, count($array) - 1);
     }
 }
